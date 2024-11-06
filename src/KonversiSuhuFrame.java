@@ -1,8 +1,11 @@
+
+import java.awt.event.KeyEvent;
+import javax.swing.JOptionPane;
+
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
-
 /**
  *
  * @author ASUS
@@ -53,6 +56,12 @@ public class KonversiSuhuFrame extends javax.swing.JFrame {
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
         jPanel1.add(jLabel1, gridBagConstraints);
+
+        txtSuhu.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtSuhuKeyTyped(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
@@ -107,6 +116,8 @@ public class KonversiSuhuFrame extends javax.swing.JFrame {
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
         jPanel1.add(jLabel3, gridBagConstraints);
+
+        txtHasil.setEditable(false);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 3;
@@ -128,6 +139,11 @@ public class KonversiSuhuFrame extends javax.swing.JFrame {
         jPanel1.add(jPanel3, new java.awt.GridBagConstraints());
 
         btnKonversi.setText("Konversi");
+        btnKonversi.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnKonversiActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 4;
@@ -139,6 +155,54 @@ public class KonversiSuhuFrame extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btnKonversiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnKonversiActionPerformed
+        String nilaiString = txtSuhu.getText();
+        if (nilaiString.isBlank()) {
+            JOptionPane.showMessageDialog(this, "nilai suhu masih kosong", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        Double nilai = Double.valueOf(nilaiString);
+        String skala = (String) cbbSkala.getSelectedItem();
+
+        String konversi;
+        if (rdCelcius.isSelected()) {
+            konversi = "Celcius";
+        } else if (rdFahrenheit.isSelected()) {
+            konversi = "Fahrenheit";
+        } else {
+            JOptionPane.showMessageDialog(this, "Konversi belum dipilih", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        Double hasil = null;
+        switch (skala) {
+            case "Celcius" -> {
+                switch (konversi) {
+                    case "Celcius" -> hasil = nilai;
+                    case "Fahrenheit" -> hasil = nilai * 9 / 5 + 32;
+                }
+            }
+            
+            case "Fahrenheit" -> {
+                switch (konversi) {
+                    case "Celcius" -> hasil = (nilai - 32) * 5 / 9;
+                    case "Fahrenheit" -> hasil = nilai;
+                }
+            }
+        }
+        
+        txtHasil.setText(String.valueOf(hasil));
+    }//GEN-LAST:event_btnKonversiActionPerformed
+
+    private void txtSuhuKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtSuhuKeyTyped
+        char c = evt.getKeyChar();
+        if (!Character.isDigit(c) && c != KeyEvent.VK_BACK_SPACE && c != KeyEvent.VK_DELETE) {
+            JOptionPane.showMessageDialog(this, "Hanya boleh angka", "Error", JOptionPane.ERROR_MESSAGE);
+            evt.consume();
+        }
+    }//GEN-LAST:event_txtSuhuKeyTyped
 
     /**
      * @param args the command line arguments
