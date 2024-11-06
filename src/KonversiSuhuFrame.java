@@ -39,6 +39,8 @@ public class KonversiSuhuFrame extends javax.swing.JFrame {
         jPanel2 = new javax.swing.JPanel();
         rdCelcius = new javax.swing.JRadioButton();
         rdFahrenheit = new javax.swing.JRadioButton();
+        rdReamur = new javax.swing.JRadioButton();
+        rdKelvin = new javax.swing.JRadioButton();
         jLabel3 = new javax.swing.JLabel();
         txtHasil = new javax.swing.JTextField();
         jPanel3 = new javax.swing.JPanel();
@@ -57,6 +59,11 @@ public class KonversiSuhuFrame extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
         jPanel1.add(jLabel1, gridBagConstraints);
 
+        txtSuhu.addCaretListener(new javax.swing.event.CaretListener() {
+            public void caretUpdate(javax.swing.event.CaretEvent evt) {
+                txtSuhuCaretUpdate(evt);
+            }
+        });
         txtSuhu.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyTyped(java.awt.event.KeyEvent evt) {
                 txtSuhuKeyTyped(evt);
@@ -76,7 +83,12 @@ public class KonversiSuhuFrame extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
         jPanel1.add(jLabel2, gridBagConstraints);
 
-        cbbSkala.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Celcius", "Fahrenheit" }));
+        cbbSkala.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Celcius", "Fahrenheit", "Reamur", "Kelvin" }));
+        cbbSkala.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                cbbSkalaItemStateChanged(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
@@ -93,13 +105,43 @@ public class KonversiSuhuFrame extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
         jPanel1.add(jLabel4, gridBagConstraints);
 
+        jPanel2.setLayout(new java.awt.GridLayout(2, 2));
+
         buttonGroup1.add(rdCelcius);
         rdCelcius.setText("Celcius");
+        rdCelcius.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                rdCelciusItemStateChanged(evt);
+            }
+        });
         jPanel2.add(rdCelcius);
 
         buttonGroup1.add(rdFahrenheit);
         rdFahrenheit.setText("Fahrenheit");
+        rdFahrenheit.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                rdFahrenheitItemStateChanged(evt);
+            }
+        });
         jPanel2.add(rdFahrenheit);
+
+        buttonGroup1.add(rdReamur);
+        rdReamur.setText("Reamur");
+        rdReamur.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                rdReamurItemStateChanged(evt);
+            }
+        });
+        jPanel2.add(rdReamur);
+
+        buttonGroup1.add(rdKelvin);
+        rdKelvin.setText("Kelvin");
+        rdKelvin.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                rdKelvinItemStateChanged(evt);
+            }
+        });
+        jPanel2.add(rdKelvin);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
@@ -157,43 +199,20 @@ public class KonversiSuhuFrame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnKonversiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnKonversiActionPerformed
-        String nilaiString = txtSuhu.getText();
-        if (nilaiString.isBlank()) {
+        Double nilai = getNilai();
+        if (nilai == null) {
             JOptionPane.showMessageDialog(this, "nilai suhu masih kosong", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        Double nilai = Double.valueOf(nilaiString);
-        String skala = (String) cbbSkala.getSelectedItem();
-
-        String konversi;
-        if (rdCelcius.isSelected()) {
-            konversi = "Celcius";
-        } else if (rdFahrenheit.isSelected()) {
-            konversi = "Fahrenheit";
-        } else {
+        String skala = getSkala();
+        String skalaHasil = getSkalaHasil();
+        if (skalaHasil == null) {
             JOptionPane.showMessageDialog(this, "Konversi belum dipilih", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        Double hasil = null;
-        switch (skala) {
-            case "Celcius" -> {
-                switch (konversi) {
-                    case "Celcius" -> hasil = nilai;
-                    case "Fahrenheit" -> hasil = nilai * 9 / 5 + 32;
-                }
-            }
-            
-            case "Fahrenheit" -> {
-                switch (konversi) {
-                    case "Celcius" -> hasil = (nilai - 32) * 5 / 9;
-                    case "Fahrenheit" -> hasil = nilai;
-                }
-            }
-        }
-        
-        txtHasil.setText(String.valueOf(hasil));
+        hitungHasil(skalaHasil, skala, nilai);
     }//GEN-LAST:event_btnKonversiActionPerformed
 
     private void txtSuhuKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtSuhuKeyTyped
@@ -203,6 +222,128 @@ public class KonversiSuhuFrame extends javax.swing.JFrame {
             evt.consume();
         }
     }//GEN-LAST:event_txtSuhuKeyTyped
+
+    private void txtSuhuCaretUpdate(javax.swing.event.CaretEvent evt) {//GEN-FIRST:event_txtSuhuCaretUpdate
+        hitungHasilOtomatis();
+    }//GEN-LAST:event_txtSuhuCaretUpdate
+
+    private void cbbSkalaItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cbbSkalaItemStateChanged
+        hitungHasilOtomatis();
+    }//GEN-LAST:event_cbbSkalaItemStateChanged
+
+    private void rdCelciusItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_rdCelciusItemStateChanged
+        hitungHasilOtomatis();
+    }//GEN-LAST:event_rdCelciusItemStateChanged
+
+    private void rdFahrenheitItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_rdFahrenheitItemStateChanged
+        hitungHasilOtomatis();
+    }//GEN-LAST:event_rdFahrenheitItemStateChanged
+
+    private void rdReamurItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_rdReamurItemStateChanged
+        hitungHasilOtomatis();
+    }//GEN-LAST:event_rdReamurItemStateChanged
+
+    private void rdKelvinItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_rdKelvinItemStateChanged
+        hitungHasilOtomatis();
+    }//GEN-LAST:event_rdKelvinItemStateChanged
+
+    private void hitungHasilOtomatis() {
+        Double nilai = getNilai();
+        if (nilai == null) {
+            return;
+        }
+
+        String skala = getSkala();
+        String skalaHasil = getSkalaHasil();
+        if (skalaHasil == null) {
+            return;
+        }
+
+        hitungHasil(skalaHasil, skala, nilai);
+    }
+
+    private Double getNilai() {
+        String nilaiString = txtSuhu.getText();
+        if (nilaiString.isBlank()) {
+            return null;
+        }
+
+        return Double.valueOf(nilaiString);
+    }
+
+    private String getSkala() {
+        return (String) cbbSkala.getSelectedItem();
+    }
+
+    private String getSkalaHasil() {
+        if (rdCelcius.isSelected()) {
+            return "Celcius";
+        } else if (rdFahrenheit.isSelected()) {
+            return "Fahrenheit";
+        } else if (rdReamur.isSelected()) {
+            return "Reamur";
+        } else if (rdKelvin.isSelected()) {
+            return "Kelvin";
+        }
+
+        return null;
+    }
+
+    private void hitungHasil(String skalaHasil, String skala, Double nilai) {
+        Double hasil = null;
+        switch (skalaHasil) {
+            case "Celcius" -> {
+                switch (skala) {
+                    case "Celcius" ->
+                        hasil = nilai;
+                    case "Fahrenheit" ->
+                        hasil = (nilai - 32) * 5 / 9;
+                    case "Reamur" ->
+                        hasil = nilai * 5 / 4;
+                    case "Kelvin" ->
+                        hasil = nilai - 273.15;
+                }
+            }
+            case "Fahrenheit" -> {
+                switch (skala) {
+                    case "Celcius" ->
+                        hasil = (nilai * 9 / 5) + 32;
+                    case "Fahrenheit" ->
+                        hasil = nilai;
+                    case "Reamur" ->
+                        hasil = (nilai * 9 / 4) + 32;
+                    case "Kelvin" ->
+                        hasil = (nilai - 273.15) * 9 / 5 + 32;
+                }
+            }
+            case "Reamur" -> {
+                switch (skala) {
+                    case "Celcius" ->
+                        hasil = nilai * 4 / 5;
+                    case "Fahrenheit" ->
+                        hasil = (nilai - 32) * 4 / 9;
+                    case "Reamur" ->
+                        hasil = nilai;
+                    case "Kelvin" ->
+                        hasil = (nilai - 273.15) * 4 / 5;
+                }
+            }
+            case "Kelvin" -> {
+                switch (skala) {
+                    case "Celcius" ->
+                        hasil = nilai + 273.15;
+                    case "Fahrenheit" ->
+                        hasil = (nilai * 9 / 5) + 32 + 273.15;
+                    case "Reamur" ->
+                        hasil = (nilai * 5 / 4) + 273.15;
+                    case "Kelvin" ->
+                        hasil = nilai;
+                }
+            }
+        }
+
+        txtHasil.setText(String.valueOf(hasil));
+    }
 
     /**
      * @param args the command line arguments
@@ -252,6 +393,8 @@ public class KonversiSuhuFrame extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel3;
     private javax.swing.JRadioButton rdCelcius;
     private javax.swing.JRadioButton rdFahrenheit;
+    private javax.swing.JRadioButton rdKelvin;
+    private javax.swing.JRadioButton rdReamur;
     private javax.swing.JTextField txtHasil;
     private javax.swing.JTextField txtSuhu;
     // End of variables declaration//GEN-END:variables
